@@ -1,0 +1,33 @@
+from pyspark.sql import SparkSession
+import tensorflow as tf
+from tensorflow.keras import layers, models
+from petastorm.spark import Spark DatasetConverter, make_spark_converter
+spark SparkSession.builder.appName("SparkCNN").getOrCreate()
+SparkDataset Converter.register_spark(spark)
+(x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
+train_df = spark.createDataFrame(
+[(x.tolist(), int(y)) for x, y in zip(x_train/255.0, y_train)], ["image", "label"])
+test_df = spark.createDataFrame(
+[(x.tolist(), int(y)) for x, y in zip(x_test/255.0, y_test)],
+["image", "label"])
+train_conv make_spark_converter(train_df)
+test_conv make_spark_converter(test_df)
+def build_model():
+model models.Sequential([
+layers.Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)),
+layers.MaxPooling2D((2, 2)),
+layers.Conv2D(64, (3, 3), activation='relu'),
+layers.MaxPooling2D((2, 2)),
+layers.Flatten(),
+layers.Dense(64, activation 'relu'),
+layers.Dense(10, activation='softmax') )
+model.compile(optimizer='adam',
+loss='sparse_categorical_crossentropy',
+metrics=['accuracy']) return model
+with train_conv.make_tf_dataset(batch_size=64) as train_ds, \
+test_conv.make_tf_dataset(batch_size=64) as test_ds:
+model build_model()
+model.fit(train_ds, validation_data=test_ds, epochs=10)
+test_loss, test_acc = model.evaluate(test_ds)
+print(f"Test accuracy: (test_acc:.2f}")
+spark.stop()
