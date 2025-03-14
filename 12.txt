@@ -1,0 +1,16 @@
+A = input_matrix(rows_A, cols_A, "A")
+B= input_matrix(rows_B, cols_B, "B")
+rdd_A = sc.parallelize([(i, j, A[i][j]) for i in range(rows_A) for j in range(cols_A)])
+rdd_B = sc.parallelize([(i, j, B[i][j]) for i in range(rows_B) for j in range(cols_B)])
+result = (
+rdd_A.map(lambda x: (x[1], (x[0], x[2]))) # Convert A to (col, (row, value))
+join(rdd_B.map(lambda x: (x[0], (x[1], x[2])))) # Join with B on col=row
+.map(lambda x: ((x[1][0][0], x[1][1][0]), x[1][0][1] x[1][1][1])) # Multiply values
+reduceByKey(lambda x, y: x + y) #Sum values with the same (i, j) key
+.collect())
+C= [[0] cols_B for in range(rows_A)]
+for (i, j), val in result: C[i][j] = val
+print("\nMatrix A:")
+for row in A:
+print(row)
+print("\nMatrix B:")
