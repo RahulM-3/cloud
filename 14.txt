@@ -1,0 +1,13 @@
+install.packages("RSQLite")
+library(RSQLite)
+set.seed(123)
+big data <- data.frame(
+ID 1:1000000,
+Name sample(letters, 1000000, replace = TRUE),
+Value runif(1000000, min = 0, max = 100)
+)
+con <- dbConnect(SQLite(), dbname = "big_data.sqlite")
+dbWriteTable(con, "big_data_table", big_data, overwrite = TRUE, row.names = FALSE)
+query_result <-dbGetQuery(con, "SELECT FROM big_data_table LIMIT 10")
+print(query_result)
+dbDisconnect(con)
